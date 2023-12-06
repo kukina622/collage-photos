@@ -14,6 +14,12 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.4.0/axios.min.js"
     integrity="sha512-uMtXmF28A2Ab/JJO2t/vYhlaa/3ahUOgj1Zf27M5rOo8/+fcTUVH0/E0ll68njmjrLqOBjXM3V9NiPFL5ywWPQ=="
     crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/izitoast/1.4.0/js/iziToast.min.js"
+    integrity="sha512-Zq9o+E00xhhR/7vJ49mxFNJ0KQw1E1TMWkPTxrWcnpfEFDEXgUiwJHIKit93EW/XxE31HSI5GEOW06G6BF1AtA=="
+    crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/izitoast/1.4.0/css/iziToast.min.css"
+    integrity="sha512-O03ntXoVqaGUTAeAmvQ2YSzkCvclZEcPQu1eqloPaHfJ5RuNGiS4l+3duaidD801P50J28EHyonCV06CUlTSag=="
+    crossorigin="anonymous" referrerpolicy="no-referrer" />
 
   <style>
     .wrapper {
@@ -44,7 +50,11 @@
 <body>
   <div class="wrapper row">
     <div class="col-4">
-      <button id="downloadButton">AAAA</button>
+      <div class="d-flex justify-content-end">
+        <button id="downloadButton" class="btn btn-secondary">
+          上傳
+        </button>
+      </div>
     </div>
     <div class="col-4">
       <img id="documentDropZone">
@@ -144,6 +154,12 @@
 
   <script>
     document.querySelector('#downloadButton').addEventListener('click', async () => {
+    
+      iziToast.success({
+        title: '送出成功',
+        message: '請稍等片刻，系統正在處理中',
+        position: 'topLeft'
+      });
 
       const frontDropZone = document.getElementById('frontDropZone')
       const backDropZone = document.getElementById('backDropZone')
