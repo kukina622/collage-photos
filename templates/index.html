@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>collage-photos</title>
+  <script src="https://cdn.jsdelivr.net/npm/interactjs/dist/interact.min.js"></script>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
+    crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.4.0/axios.min.js"
+    integrity="sha512-uMtXmF28A2Ab/JJO2t/vYhlaa/3ahUOgj1Zf27M5rOo8/+fcTUVH0/E0ll68njmjrLqOBjXM3V9NiPFL5ywWPQ=="
+    crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+  <style>
+    .wrapper {
+      display: flex;
+      align-items: start;
+      justify-content: center;
+      margin: 0;
+      padding: 0;
+    }
+
+    #documentDropZone {
+      max-width: 100%;
+    }
+
+    .draggable {
+      height: 200px;
+      width: 350px;
+      position: absolute;
+    }
+
+    .draggable:nth-child(2) {
+      top: 210px;
+    }
+  </style>
+
+</head>
+
+<body>
+  <div class="wrapper row">
+    <div class="col-4">
+      <button id="downloadButton">AAAA</button>
+    </div>
+    <div class="col-4">
+      <img id="documentDropZone">
+    </div>
+    <div class="col-4 position-relative">
+      <img id="frontDropZone" class="draggable" />
+      <img id="backDropZone" class="draggable" />
+    </div>
+  </div>
+
+  <script>
+
+    const frontURL = {{ data.front }}
+    const backURL = {{ data.back }}
+    const documentURL = {{ data.document }}
+
+    const frontDropZone = document.getElementById('frontDropZone')
+    const backDropZone = document.getElementById('backDropZone')
+    const documentDropZone = document.getElementById('documentDropZone')
+
+    frontDropZone.setAttribute("src", frontURL)
+    backDropZone.setAttribute("src", backURL)
+    documentDropZone.setAttribute("src", documentURL)
+  </script>
+
+  <script>
+
+    window.onload = function () {
+      makeElementDragable('.draggable')
+    }
+
+    function makeElementDragable(selector) {
+      interact(selector)
+        .draggable({
+          onmove: window.dragMoveListener
+        })
+        .resizable({
+          preserveAspectRatio: false,
+          edges: { left: true, right: true, bottom: true, top: true },
+          listeners: {
+            move: function (event) {
+              const target = event.target
+              let { x, y } = target.dataset
+
+              x = (parseFloat(x) || 0) + event.deltaRect.left
+              y = (parseFloat(y) || 0) + event.deltaRect.top
+
+              Object.assign(target.style, {
+                width: `${event.rect.width}px`,
+                height: `${event.rect.height}px`,
+                transform: `translate(${x}px, ${y}px)`
+              })
+
+
+              target.setAttribute('data-x2', (parseFloat(target.getAttribute('data-x1')) || 0) + event.rect.width);
+              target.setAttribute('data-y2', (parseFloat(target.getAttribute('data-y1')) || 0) + event.rect.height);
+            }
+          }
+
+        })
+        .on('resizemove', function (event) {
+          var target = event.target,
+            x = (parseFloat(target.getAttribute('data-x1')) || 0),
+            y = (parseFloat(target.getAttribute('data-y1')) || 0);
+
+          target.style.width = event.rect.width + 'px';
+          target.style.height = event.rect.height + 'px';
+
+          x += event.deltaRect.left;
+          y += event.deltaRect.top;
+
+          target.style.webkitTransform = target.style.transform =
+            'translate(' + x + 'px,' + y + 'px)';
+
+          target.setAttribute('data-x1', x);
+          target.setAttribute('data-y1', y);
+          target.setAttribute('data-x2', (parseFloat(target.getAttribute('data-x1')) || 0) + event.rect.width);
+          target.setAttribute('data-y2', (parseFloat(target.getAttribute('data-y1')) || 0) + event.rect.height);
+        });
+    }
+
+    function dragMoveListener(event) {
+      var target = event.target,
+        x = (parseFloat(target.getAttribute('data-x1')) || 0) + event.dx,
+        y = (parseFloat(target.getAttribute('data-y1')) || 0) + event.dy;
+
+      target.style.webkitTransform = target.style.transform = 'translate(' + x + 'px, ' + y + 'px)';
+
+      target.setAttribute('data-x1', x);
+      target.setAttribute('data-y1', y);
+      target.setAttribute('data-x2', (parseFloat(target.getAttribute('data-x1')) || 0) + event.rect.width);
+      target.setAttribute('data-y2', (parseFloat(target.getAttribute('data-y1')) || 0) + event.rect.height);
+
+    }
+
+  </script>
+
+  <script>
+    document.querySelector('#downloadButton').addEventListener('click', async () => {
+
+      const frontDropZone = document.getElementById('frontDropZone')
+      const backDropZone = document.getElementById('backDropZone')
+      const documentDropZone = document.getElementById('documentDropZone')
+
+      const payload = {
+        size: {
+          front: [frontDropZone.width, frontDropZone.height],
+          back: [backDropZone.width, backDropZone.height],
+          document: [documentDropZone.width, documentDropZone.height],
+        },
+        position: {
+          front: [
+            parseFloat(frontDropZone.getAttribute('data-x1')) + documentDropZone.width + convertRemToPixels(1.5),
+            parseFloat(frontDropZone.getAttribute('data-y1'))
+          ],
+          back: [
+            parseFloat(backDropZone.getAttribute('data-x1')) + documentDropZone.width + convertRemToPixels(1.5),
+            parseFloat(backDropZone.getAttribute('data-y1')) + 210
+          ],
+        },
+        source: {
+          front: frontURL,
+          back: backURL,
+          document: documentURL,
+        }
+      }
+      const res = await axios.post("./composite", payload, { responseType: 'blob' })
+      const url = window.URL.createObjectURL(new Blob([res.data]));
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${Date.now()}.png`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+
+    })
+
+    function convertRemToPixels(rem) {
+      return rem * parseFloat(getComputedStyle(document.documentElement).fontSize);
+    }
+
+
+  </script>
+</body>
+
+</html>
