@@ -57,9 +57,9 @@
 
   <script>
 
-    const frontURL = {{ data.front }}
-    const backURL = {{ data.back }}
-    const documentURL = {{ data.document }}
+    const frontURL = "{{ data.front }}".replaceAll("&amp;", "&")
+    const backURL = "{{ data.back }}".replaceAll("&amp;", "&")
+    const documentURL = "{{ data.document }}".replaceAll("&amp;", "&")
 
     const frontDropZone = document.getElementById('frontDropZone')
     const backDropZone = document.getElementById('backDropZone')
