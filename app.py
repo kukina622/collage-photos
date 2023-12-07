@@ -10,17 +10,16 @@ app.config['MAX_CONTENT_LENGTH'] = 32 * 1024 * 1024
 def index():
   if request.method == "GET":
     data={
-      "front": request.args.get("front").replace("&amp;", "&"),
-      "back": request.args.get("back").replace("&amp;", "&"),
-      "document": request.args.get("document").replace("&amp;", "&")
+      "front": request.args.get("front", "").replace("&amp;", "&"),
+      "back": request.args.get("back", "").replace("&amp;", "&"),
+      "document": request.args.get("document", "").replace("&amp;", "&")
     }
-    print(request.args)
   elif request.method == "POST":
     json = request.json
     data={
-      "front": json.get("front"),
-      "back": json.get("back"),
-      "document": json.get("document")
+      "front": json.get("front", ""),
+      "back": json.get("back", ""),
+      "document": json.get("document", "")
     }
   return render_template("index.html", data=data)
 
